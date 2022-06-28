@@ -1,5 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import fetchToken from '../services/fetchToken';
 import isEmailValid from '../utils/isEmailValid';
 
 class Login extends React.Component {
@@ -18,8 +20,10 @@ class Login extends React.Component {
     return (name && isEmailValid(gravatarEmail));
   }
 
-  handleUserLogin = () => {
-
+  handleUserLogin = async () => {
+    const { history } = this.props;
+    await fetchToken();
+    history.push('/game');
   }
 
   render() {
@@ -61,5 +65,12 @@ class Login extends React.Component {
     );
   }
 }
+
+Login.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+};
+// const mapDispatchToProps = ()
 
 export default connect()(Login);
