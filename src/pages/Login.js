@@ -28,6 +28,11 @@ class Login extends React.Component {
     history.push('/game');
   }
 
+  goToSettings = () => {
+    const { history } = this.props;
+    history.push('/settings');
+  }
+
   render() {
     const { name, gravatarEmail } = this.state;
     return (
@@ -62,6 +67,13 @@ class Login extends React.Component {
           disabled={ !this.isFormValid() }
         >
           Play
+        </button>
+        <button
+          type="button"
+          data-testid="btn-settings"
+          onClick={ this.goToSettings }
+        >
+          Settings
         </button>
       </form>
     );
