@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import fetchToken from '../services/fetchToken';
 import isEmailValid from '../utils/isEmailValid';
+import { sendUserInfo } from '../redux/actions/actions';
 
 class Login extends React.Component {
   state = {
@@ -21,9 +22,15 @@ class Login extends React.Component {
   }
 
   handleUserLogin = async () => {
-    const { history } = this.props;
+    const { history, dispatchUserInfo } = this.props;
+    dispatchUserInfo(this.state);
     await fetchToken();
     history.push('/game');
+  }
+
+  goToSettings = () => {
+    const { history } = this.props;
+    history.push('/settings');
   }
 
   render() {
@@ -61,6 +68,13 @@ class Login extends React.Component {
         >
           Play
         </button>
+        <button
+          type="button"
+          data-testid="btn-settings"
+          onClick={ this.goToSettings }
+        >
+          Settings
+        </button>
       </form>
     );
   }
@@ -70,7 +84,10 @@ Login.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }).isRequired,
+  dispatchUserInfo: PropTypes.func.isRequired,
 };
-// const mapDispatchToProps = ()
+const mapDispatchToProps = (dispatch) => ({
+  dispatchUserInfo: (info) => dispatch(sendUserInfo(info)),
+});
 
-export default connect()(Login);
+export default connect(null, mapDispatchToProps)(Login);
