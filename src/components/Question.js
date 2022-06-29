@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import './styles/Question.css';
 
 class Question extends Component {
-  checkClass = (answered, question, answer) => {
+  toggleQuestionClass = (answered, question, answer) => {
     if (!answered) {
       return '';
     }
@@ -16,14 +16,9 @@ class Question extends Component {
   }
 
   render() {
-    const shuffle = 0.5;
-    const { question, answered, handleClick } = this.props;
+    const { question, answered, handleClick, isDisabled } = this.props;
 
-    const answers = [...question.incorrect_answers, question.correct_answer]
-      .sort((a, b) => {
-        console.log(a, b);
-        return shuffle - Math.random();
-      });
+    const answers = question.sortedAnswers;
 
     return (
       <div className="question-div">
@@ -34,12 +29,15 @@ class Question extends Component {
             <button
               type="button"
               key={ answer }
+              disabled={ isDisabled }
               data-testid={
                 question.incorrect_answers.includes(answer)
                   ? `wrong-answer-${index}`
                   : 'correct-answer'
               }
-              className={ this.checkClass(answered, question.incorrect_answers, answer) }
+              className={
+                this.toggleQuestionClass(answered, question.incorrect_answers, answer)
+              }
               onClick={ handleClick }
             >
               {answer}
@@ -61,7 +59,9 @@ Question.propTypes = {
     question: PropTypes.string.isRequired,
     correct_answer: PropTypes.string.isRequired,
     incorrect_answers: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+    sortedAnswers: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
   }).isRequired,
   answered: PropTypes.bool.isRequired,
+  isDisabled: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
 };

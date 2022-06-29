@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import fetchGameQuestions from '../services/fetchGameQuestions';
+import sortQuestions from '../utils/sortQuestions';
 import Question from '../components/Question';
 import Header from '../components/Header';
 
@@ -9,6 +10,8 @@ class Game extends Component {
     questions: [],
     index: 0,
     answered: false,
+    timer: 30,
+    nextButtonDisabled: true,
   }
 
   async componentDidMount() {
@@ -21,10 +24,39 @@ class Game extends Component {
       history.push('/');
     }
 
+    const resultsSorted = results.map(sortQuestions);
+
     this.setState((prevState) => ({
       ...prevState,
-      questions: [...results],
+      questions: [...resultsSorted],
     }));
+
+    this.timerCounter();
+  }
+
+  componentDidUpdate() {
+    const { timer, nextButtonDisabled, intervalId } = this.state;
+
+    if (timer === 0 && nextButtonDisabled) {
+      this.setState({ nextButtonDisabled: false });
+    }
+
+    if (timer === 0) clearInterval(intervalId);
+  }
+
+  timerCounter = () => {
+    const { timer } = this.state;
+    const delayInMiliseconds = 1000;
+
+    if (timer > 0) {
+      const intervalId = setInterval(() => {
+        this.setState((prevState) => ({
+          ...prevState,
+          timer: prevState.timer - 1,
+          intervalId,
+        }));
+      }, delayInMiliseconds);
+    }
   }
 
   increment = () => {
@@ -32,21 +64,21 @@ class Game extends Component {
     this.setState((prevState) => ({
       ...prevState,
       index: prevState.index < maxLength ? prevState.index + 1 : 0,
-    }));
+      answered: false,
+      timer: 30,
+      nextButtonDisabled: true,
+    }), () => this.timerCounter());
   }
 
   handleAnswerClick = () => {
-    const delayInSeconds = 2000;
-    this.setState({ answered: true }, () => {
-      setTimeout(() => {
-        this.increment();
-        this.setState({ answered: false });
-      }, delayInSeconds);
+    this.setState({
+      answered: true,
+      nextButtonDisabled: false,
     });
   }
 
   render() {
-    const { index, questions, answered } = this.state;
+    const { index, questions, answered, timer, nextButtonDisabled } = this.state;
 
     return (
       <>
@@ -57,11 +89,22 @@ class Game extends Component {
               question={ questions[index] }
               answered={ answered }
               handleClick={ this.handleAnswerClick }
+              isDisabled={ !nextButtonDisabled }
             />
           )}
-          <button type="button" onClick={ this.increment }>
-            Next
-          </button>
+          <h1>{timer}</h1>
+          {
+            answered && (
+              <button
+                type="button"
+                data-testid="btn-next"
+                onClick={ this.increment }
+                disabled={ nextButtonDisabled }
+              >
+                Next
+              </button>
+            )
+          }
         </main>
       </>
     );
