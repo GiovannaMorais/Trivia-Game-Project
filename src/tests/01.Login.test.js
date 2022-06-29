@@ -1,9 +1,9 @@
 import React from "react";
 import { cleanup, waitFor } from "@testing-library/react";
-import { renderWithRouterAndRedux } from './renderWithRouterAndRedux';
+import { renderWithRouterAndRedux } from './helpers/renderWithRouterAndRedux';
 import { screen } from '@testing-library/react';
 import userEvent from "@testing-library/user-event";
-import App from '../../App';
+import App from '../App';
 
 
 describe('Testes na página de login', () => {
