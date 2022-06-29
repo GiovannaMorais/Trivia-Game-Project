@@ -43,7 +43,6 @@ describe('Testes na página de login', () => {
 
     userEvent.click(BUTTON_LOGIN);
 
-    // const {location: { pathname }} = history;
     await waitFor(() => {
       expect(history.location.pathname).toBe('/game')
     });     

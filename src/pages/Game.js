@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import md5 from 'crypto-js/md5';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import fetchGameQuestions from '../services/fetchGameQuestions';
 import Question from '../components/Question';
+import Header from '../components/Header';
 
 class Game extends Component {
   state = {
@@ -49,22 +48,9 @@ class Game extends Component {
   render() {
     const { index, questions, answered } = this.state;
 
-    const { gravatarEmail, userName } = this.props;
-
-    const gravatarBaseUrl = 'https://www.gravatar.com/avatar/';
-    const userEmailToHash = md5(gravatarEmail).toString();
-
     return (
       <>
-        <header>
-          <img
-            src={ `${gravatarBaseUrl}${userEmailToHash}` }
-            alt={ `${userName}` }
-            data-testid="header-profile-picture"
-          />
-          <p data-testid="header-player-name">{ userName }</p>
-          <p data-testid="header-score">0</p>
-        </header>
+        <Header />
         <main>
           { !!questions.length && (
             <Question
@@ -82,17 +68,10 @@ class Game extends Component {
   }
 }
 
-const mapStateToProps = (state) => ({
-  gravatarEmail: state.player.gravatarEmail,
-  userName: state.player.name,
-});
-
 Game.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }).isRequired,
-  gravatarEmail: PropTypes.string.isRequired,
-  userName: PropTypes.string.isRequired,
 };
 
-export default connect(mapStateToProps)(Game);
+export default Game;
