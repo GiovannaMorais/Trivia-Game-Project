@@ -126,7 +126,6 @@ class Game extends Component {
                 type="button"
                 data-testid="btn-next"
                 onClick={ this.increment }
-                disabled={ nextButtonDisabled }
               >
                 Next
               </button>
