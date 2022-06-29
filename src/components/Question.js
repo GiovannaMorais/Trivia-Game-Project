@@ -27,7 +27,7 @@ class Question extends Component {
     };
 
     if (answer === question.correct_answer) {
-      const points = minPoints + timer * pointsMeasure[question.difficulty];
+      const points = minPoints + (timer * pointsMeasure[question.difficulty]);
       return score + points;
     }
 
