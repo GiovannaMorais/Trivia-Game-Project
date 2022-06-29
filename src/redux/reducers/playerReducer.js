@@ -1,9 +1,9 @@
-import { SEND_USER_INFO } from '../actions/actionTypes';
+import { SEND_USER_GAME_INFO, SEND_USER_INFO } from '../actions/actionTypes';
 
 const INITIAL_STATE = {
   name: '',
-  assertions: '',
-  score: '',
+  assertions: 0,
+  score: 0,
   gravatarEmail: '',
 };
 
@@ -12,7 +12,14 @@ const player = (state = INITIAL_STATE, action) => {
   case SEND_USER_INFO:
     return {
       ...state,
-      ...action.payload,
+      name: action.payload.name,
+      gravatarEmail: action.payload.gravatarEmail,
+    };
+  case SEND_USER_GAME_INFO:
+    return {
+      ...state,
+      score: action.payload.score,
+      assertions: action.payload.assertions,
     };
   default:
     return state;

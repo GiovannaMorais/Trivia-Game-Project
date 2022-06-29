@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import './styles/Question.css';
 
@@ -13,6 +14,41 @@ class Question extends Component {
     }
 
     return 'correct';
+  }
+
+  calculatePoints = (answer, question) => {
+    const { timer, score } = this.props;
+    const minPoints = 10;
+
+    const pointsMeasure = {
+      easy: 1,
+      medium: 2,
+      hard: 3,
+    };
+
+    if (answer === question.correct_answer) {
+      const points = minPoints + timer * pointsMeasure[question.difficulty];
+      return score + points;
+    }
+
+    return score;
+  }
+
+  calculateAssertions = (answer, question) => {
+    const { assertions } = this.props;
+
+    if (answer === question.correct_answer) {
+      return assertions + 1;
+    }
+
+    return assertions;
+  }
+
+  calculateScore = (answer, question) => {
+    const points = this.calculatePoints(answer, question);
+    const assertions = this.calculateAssertions(answer, question);
+
+    return { points, assertions };
   }
 
   render() {
@@ -38,7 +74,7 @@ class Question extends Component {
               className={
                 this.toggleQuestionClass(answered, question.incorrect_answers, answer)
               }
-              onClick={ handleClick }
+              onClick={ () => handleClick(this.calculateScore(answer, question)) }
             >
               {answer}
             </button>
@@ -49,7 +85,12 @@ class Question extends Component {
   }
 }
 
-export default Question;
+const mapStateToProps = (state) => ({
+  score: state.player.score,
+  assertions: state.player.assertions,
+});
+
+export default connect(mapStateToProps)(Question);
 
 Question.propTypes = {
   question: PropTypes.shape({
@@ -64,4 +105,7 @@ Question.propTypes = {
   answered: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
+  score: PropTypes.number.isRequired,
+  timer: PropTypes.number.isRequired,
+  assertions: PropTypes.number.isRequired,
 };

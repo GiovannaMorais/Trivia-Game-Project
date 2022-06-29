@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import fetchGameQuestions from '../services/fetchGameQuestions';
 import sortQuestions from '../utils/sortQuestions';
 import Question from '../components/Question';
 import Header from '../components/Header';
+import { sendUserGameInfo } from '../redux/actions/actions';
 
 class Game extends Component {
   state = {
@@ -37,11 +39,11 @@ class Game extends Component {
   componentDidUpdate() {
     const { timer, nextButtonDisabled, intervalId } = this.state;
 
+    if (timer === 0) clearInterval(intervalId);
+
     if (timer === 0 && nextButtonDisabled) {
       this.setState({ nextButtonDisabled: false });
     }
-
-    if (timer === 0) clearInterval(intervalId);
   }
 
   timerCounter = () => {
@@ -61,6 +63,9 @@ class Game extends Component {
 
   increment = () => {
     const maxLength = 4;
+    const { history } = this.props;
+    const { intervalId, index } = this.state;
+    clearInterval(intervalId);
     this.setState((prevState) => ({
       ...prevState,
       index: prevState.index < maxLength ? prevState.index + 1 : 0,
@@ -68,13 +73,22 @@ class Game extends Component {
       timer: 30,
       nextButtonDisabled: true,
     }), () => this.timerCounter());
+
+    if (index === maxLength) history.push('/feedback');
+  };
+
+  setPoints = (points, assertions) => {
+    const { sendGameInfo } = this.props;
+    sendGameInfo(points, assertions);
   }
 
-  handleAnswerClick = () => {
+  handleAnswerClick = ({ points, assertions }) => {
     this.setState({
       answered: true,
       nextButtonDisabled: false,
     });
+
+    this.setPoints(points, assertions);
   }
 
   render() {
@@ -90,6 +104,7 @@ class Game extends Component {
               answered={ answered }
               handleClick={ this.handleAnswerClick }
               isDisabled={ !nextButtonDisabled }
+              timer={ timer }
             />
           )}
           <h1>{timer}</h1>
@@ -111,10 +126,20 @@ class Game extends Component {
   }
 }
 
+const mapDispatchToProps = (dispatch) => ({
+  sendGameInfo: (score, assertions) => dispatch(sendUserGameInfo(score, assertions)),
+});
+
+const mapStateToProps = (state) => ({
+  score: state.player.score,
+  assertions: state.player.assertions,
+});
+
 Game.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }).isRequired,
+  sendGameInfo: PropTypes.func.isRequired,
 };
 
-export default Game;
+export default connect(mapStateToProps, mapDispatchToProps)(Game);
