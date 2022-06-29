@@ -169,7 +169,7 @@ describe('Testes na página de login', () => {
     jest.spyOn(Object.getPrototypeOf(localStorage), "getItem");
     jest.spyOn(Object.getPrototypeOf(localStorage), "setItem");
 
-    const { history } = renderWithRouterAndRedux(<App />)
+    const { history } = renderWithRouterAndRedux(<App />);
 
     const NAME_INPUT = screen.getByTestId("input-player-name");
     const EMAIL_INPUT = screen.getByTestId("input-gravatar-email");
@@ -186,5 +186,74 @@ describe('Testes na página de login', () => {
 
     expect(localStorage.setItem).toHaveBeenCalled();
     expect(localStorage.getItem).toHaveBeenCalled();
+  })
+  it('Teste se o ranking é salvo no localStorage', async () => {
+    // SETANDO O LOCAL STORAGE INICIAL
+    const token = 'a9c201e5dce6288034315a596cf296525a305f86b3ba6f5004d90fbb8575be47';
+    const fakeUserResponse = {token: token, ranking: [{name: 'João Otávio', score: 320, assertions: 5, gravatarEmail: 'trybe@gmail.com'}]};
+
+    global.fetch = jest.fn(() => Promise.resolve(({
+      json: () => Promise.resolve(successQuestionMock)
+    })))
+
+    jest.spyOn(window, 'fetch').mockImplementationOnce(() => {
+      return Promise.resolve({
+        json: () => Promise.resolve(fakeUserResponse),
+      })
+    })
+  
+    const { history } = renderWithRouterAndRedux(<App />);
+
+    const NAME_INPUT = screen.getByTestId("input-player-name");
+    const EMAIL_INPUT = screen.getByTestId("input-gravatar-email");
+    const BUTTON_LOGIN = screen.getByTestId("btn-play");
+    
+    userEvent.type(NAME_INPUT, 'João Otávio');
+    userEvent.type(EMAIL_INPUT, 'trybe@gmail.com');
+    
+    userEvent.click(BUTTON_LOGIN);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe('/')
+    });
+    // CLICAR NAS QUESTOES ATE REDIRECIONAR A PAG
+    successQuestionMock.results.forEach((question) => {
+      const RIGHT_QUESTION_BUTTON = screen.getByRole('button', { name: question.correct_answer });
+      
+      expect(screen.getByText(question.question)).toBeInTheDocument();
+      expect(RIGHT_QUESTION_BUTTON).toBeInTheDocument();
+      
+      question.incorrect_answers.forEach((incorrectAnswer) => {
+        expect(screen.getByRole('button', { name: incorrectAnswer })).toBeInTheDocument();
+      })
+      
+      expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
+      expect(RIGHT_QUESTION_BUTTON).toHaveProperty('disabled', false);
+      
+      userEvent.click(RIGHT_QUESTION_BUTTON);
+
+      expect(RIGHT_QUESTION_BUTTON.className).toBe('correct')
+      
+      question.incorrect_answers.forEach((incorrectAnswer) => {
+        expect(screen.getByRole('button', { name: incorrectAnswer }).className).toBe('wrong');
+      })
+
+      expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument()
+      expect(RIGHT_QUESTION_BUTTON.disabled).toBeTruthy();
+
+      userEvent.click(screen.getByTestId('btn-next'));
+    })
+    // VERIFICA SE A STORE ESTA COMO DEVERIA NO FINAL
+    expect(JSON.parse(window.localStorage.ranking)).toEqual(
+      [{
+        name: 'João Otávio',
+        score: 320, assertions: 5,
+        gravatarEmail: 'trybe@gmail.com',
+      }, {
+        name: 'João Otávio',
+        score: 320, assertions: 5,
+        gravatarEmail: 'trybe@gmail.com',
+      }]
+    )
   })
 })
