@@ -1,4 +1,4 @@
-import { SEND_USER_INFO, SEND_USER_GAME_INFO } from './actionTypes';
+import { SEND_USER_INFO, SEND_USER_GAME_INFO, RESET_USER_POINTS } from './actionTypes';
 
 export const sendUserInfo = (info) => ({
   type: SEND_USER_INFO,
@@ -11,4 +11,8 @@ export const sendUserGameInfo = (score, assertions) => ({
     score,
     assertions,
   },
+});
+
+export const resetPoints = () => ({
+  type: RESET_USER_POINTS,
 });

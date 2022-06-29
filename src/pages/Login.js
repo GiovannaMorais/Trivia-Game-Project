@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import fetchToken from '../services/fetchToken';
 import isEmailValid from '../utils/isEmailValid';
-import { sendUserInfo } from '../redux/actions/actions';
+import { sendUserInfo, resetPoints } from '../redux/actions/actions';
 
 class Login extends React.Component {
   state = {
@@ -22,7 +22,8 @@ class Login extends React.Component {
   }
 
   handleUserLogin = async () => {
-    const { history, dispatchUserInfo } = this.props;
+    const { history, dispatchUserInfo, resetUserPoints } = this.props;
+    resetUserPoints();
     dispatchUserInfo(this.state);
     await fetchToken();
     history.push('/game');
@@ -85,9 +86,11 @@ Login.propTypes = {
     push: PropTypes.func.isRequired,
   }).isRequired,
   dispatchUserInfo: PropTypes.func.isRequired,
+  resetUserPoints: PropTypes.func.isRequired,
 };
 const mapDispatchToProps = (dispatch) => ({
   dispatchUserInfo: (info) => dispatch(sendUserInfo(info)),
+  resetUserPoints: () => dispatch(resetPoints()),
 });
 
 export default connect(null, mapDispatchToProps)(Login);

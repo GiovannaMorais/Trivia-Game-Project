@@ -63,7 +63,10 @@ class Game extends Component {
 
   increment = () => {
     const maxLength = 4;
-    const { history } = this.props;
+    const {
+      history,
+      player,
+    } = this.props;
     const { intervalId, index } = this.state;
     clearInterval(intervalId);
     this.setState((prevState) => ({
@@ -74,7 +77,16 @@ class Game extends Component {
       nextButtonDisabled: true,
     }), () => this.timerCounter());
 
-    if (index === maxLength) history.push('/feedback');
+    if (index === maxLength) {
+      history.push('/feedback');
+
+      if (!localStorage.getItem('ranking')) {
+        localStorage.setItem('ranking', JSON.stringify([player]));
+      } else {
+        const ranking = JSON.parse(localStorage.getItem('ranking'));
+        localStorage.setItem('ranking', JSON.stringify([...ranking, player]));
+      }
+    }
   };
 
   setPoints = (points, assertions) => {
@@ -131,13 +143,18 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 const mapStateToProps = (state) => ({
-  score: state.player.score,
-  assertions: state.player.assertions,
+  ...state,
 });
 
 Game.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
+  }).isRequired,
+  player: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    score: PropTypes.number.isRequired,
+    assertions: PropTypes.number.isRequired,
+    gravatarEmail: PropTypes.string.isRequired,
   }).isRequired,
   sendGameInfo: PropTypes.func.isRequired,
 };

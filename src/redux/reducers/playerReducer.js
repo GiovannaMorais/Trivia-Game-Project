@@ -1,4 +1,8 @@
-import { SEND_USER_GAME_INFO, SEND_USER_INFO } from '../actions/actionTypes';
+import {
+  SEND_USER_GAME_INFO,
+  SEND_USER_INFO,
+  RESET_USER_POINTS,
+} from '../actions/actionTypes';
 
 const INITIAL_STATE = {
   name: '',
@@ -21,6 +25,8 @@ const player = (state = INITIAL_STATE, action) => {
       score: action.payload.score,
       assertions: action.payload.assertions,
     };
+  case RESET_USER_POINTS:
+    return INITIAL_STATE;
   default:
     return state;
   }
